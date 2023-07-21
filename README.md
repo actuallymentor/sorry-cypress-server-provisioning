@@ -6,17 +6,17 @@ This repository is intended as a setup script to configure a remote server as a 
 2. Starts a `docker-compose` stack with a [full sorry-cypress stack](https://docs.sorry-cypress.dev/configuration/persistent)
 3. Starts a reverse proxy for the cypress director and dashboard
 
-Authentication is done using basic auth, which is set up based on enrionment variables in the `.env` file.
+Authentication is done using basic auth, which is set up based on environment variables in the `.env` file.
 
 ## Requirements
 
-1. An Ubuntu 22.04 server with a public IP address (recommended minimum of 1GG RAM)
-2. A 3 subdomains of a main domain name pointing to the server
+1. An Ubuntu 22.04 server with a public IP address (recommended minimum of 1G RAM)
+2. 3 subdomains of a main domain name pointing to the server
 
 ## Usage
 
 1. Clone this repository
-2. Populate the `.env` file with the required variables, see `.env.example` for examples
+2. Populate the `.env` file with the required variables, see `.env.example`
 3. Run `bash scripts/provision.sh`
 4. Follow the instructions in the script
 
@@ -34,7 +34,7 @@ The dashboard and API containers are nice for having a dashboard to view from, b
 
 **Containers are isolated from the internet**
 
-The docker stack only exposes the `sorry-cypress` comtainers through the reverse proxy. You can test this by running:
+The docker stack only exposes the `sorry-cypress` containers through the reverse proxy. You can test this by running:
 
 ```bash
 source .env

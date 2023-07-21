@@ -1,3 +1,4 @@
+#!/bin/bash
 # Exit if docker is intalled
 if which docker; then
     echo "Docker is already installed"
