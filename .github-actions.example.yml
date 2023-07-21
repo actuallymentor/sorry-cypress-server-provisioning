@@ -1,0 +1,64 @@
+name: Deployment that runs Cypress tests in parallel before deploying
+
+on:
+  pull_request:
+    branches:
+      - development
+      - main
+
+jobs:
+
+  ## ###############
+  ## 💚 Automated testing
+  ## ###############
+  automated-testing:
+
+    name: Pull request automated testing
+    runs-on: buildjet-8vcpu-ubuntu-2204
+    strategy:
+      fail-fast: false
+      matrix:
+        # run 4 copies of the current job in  parallel
+        containers: [ 1, 2, 3, 4 ]
+    steps:
+
+      # Clones repo to the commit that triggered the event
+      - name: Cloning repository
+        uses: actions/checkout@v3
+
+      # Check CI
+      - name: Run cypress tests
+        run: npx cypress-cloud run --browser chrome --parallel --record
+
+      # Upload the videos for debugging
+      - name: Upload video files
+        uses: actions/upload-artifact@v3
+        with:
+          name: cypress-videos ${{ matrix.containers }}
+          path: |
+            cypress/videos
+            cypress/screenshots
+
+      # Upload log files of this fun
+      - name: Upload all log files
+        uses: actions/upload-artifact@v3
+        with:
+          name: logfiles ${{ matrix.containers }}
+          path: |
+            *.log
+            **/*.log
+
+  ## ###############
+  ## 🚀 Deploy
+  ## ###############
+  deploy-preview:
+    needs: automated-testing
+    runs-on: buildjet-4vcpu-ubuntu-2204
+    steps:
+
+      # Clones repo to the commit that triggered the event
+      - name: Cloning repository
+        uses: actions/checkout@v3
+
+      # Do your deployment
+      # ...

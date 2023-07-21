@@ -1,0 +1,120 @@
+version: '3'
+
+# Network configuration, we'll make one internal network for the cypress container, and one publicly available network for the proxy
+networks:
+  internal:
+    name: internal
+    # internal: true
+  external:
+    name: external
+
+services:
+
+  ## ###############
+  ## Infra services
+  ## ###############
+
+  # MongoDB service, this is used by the cypress services to store data
+  mongo:
+    image: mongo:4.4
+    container_name: mongo
+    volumes:
+      - ./data/data-mongo-cypress:/data/db
+    networks:
+      - internal
+    restart: unless-stopped
+
+  # Reverse proxy service, this is used to expose the cypress services to the world securely
+  swag:
+    image: lscr.io/linuxserver/swag:latest
+    container_name: swag
+    cap_add:
+      - NET_ADMIN
+    environment:
+      # Environment setup
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+      # Automatic SSL certificate provisioning
+      - URL=${PROXY_SERVER_DOMAIN}
+      - VALIDATION=http
+      - SUBDOMAINS=${PROXY_DIRECTOR_SUBDOMAIN},${PROXY_API_SUBDOMAIN},${PROXY_DASHBOARD_SUBDOMAIN}
+      - ONLY_SUBDOMAINS=true
+    volumes:
+      - ./swag:/config
+    ports:
+      - 443:443
+      - 80:80
+    networks:
+      - internal
+      - external
+    restart: unless-stopped
+
+  ## ###############
+  ## Cypress services
+  ## ###############
+
+  # 1️⃣ Cypress director (required)
+  # Coordinates & parallelizes tests, saves test results, this is the container that the cypress test runner connects to
+  # This is the only **required** service to run parallel tests, see: https://docs.sorry-cypress.dev/configuration/in-memory
+  director:
+    image: agoldis/sorry-cypress-director:latest
+    container_name: sorry-cypress-director
+    environment:
+      DASHBOARD_URL: https://${PROXY_DASHBOARD_SUBDOMAIN}.${PROXY_SERVER_DOMAIN}
+      MONGODB_URI: 'mongodb://mongo:27017'
+      MONGODB_DATABASE: 'sorry-cypress'
+      EXECUTION_DRIVER: '../execution/mongo/driver'
+      SCREENSHOTS_DRIVER: '../screenshots/s3.driver'
+      GITLAB_JOB_RETRIES: 'false'
+      AWS_ACCESS_KEY_ID: 'key'
+      AWS_SECRET_ACCESS_KEY: 'secret'
+      S3_BUCKET: sorry-cypress
+      PROBE_LOGGER: "false"
+    ports:
+      - 1234:1234
+    networks:
+      - internal
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+  # 2️⃣ Cypress API service (optional)
+  # The service is only required as an interface for the Web Dashboard
+  api:
+    image: agoldis/sorry-cypress-api:latest
+    container_name: sorry-cypress-api
+    environment:
+      MONGODB_URI: 'mongodb://mongo:27017'
+      MONGODB_DATABASE: 'sorry-cypress'
+      APOLLO_PLAYGROUND: 'false'
+    ports:
+      - 4000:4000
+    networks:
+      - internal
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+  # 3️⃣ Cypress dashboard (optional)
+  # The dashboard allows end-users to interact with sorry-cypress using a browser
+  dashboard:
+    image: agoldis/sorry-cypress-dashboard:latest
+    container_name: sorry-cypress-dashboard
+    environment:
+      GRAPHQL_SCHEMA_URL: https://${PROXY_USER}:${PROXY_PASSWORD}@${PROXY_API_SUBDOMAIN}.${PROXY_SERVER_DOMAIN}
+      GRAPHQL_CLIENT_CREDENTIALS: ''
+      CI_URL: ''
+      # As used in /swag/nginx/proxy-confs/sorry-cypress.subdomain.conf
+      # see source: https://github.com/sorry-cypress/sorry-cypress/blob/master/packages/dashboard/server/config.js
+      # see source: https://github.com/sorry-cypress/sorry-cypress/blob/master/packages/dashboard/server/app.js
+      BASE_PATH: '/'
+      PORT: 8080
+    ports:
+      - 8080:8080
+    depends_on:
+      - mongo
+      - api
+    networks:
+      - internal
+    restart: unless-stopped
