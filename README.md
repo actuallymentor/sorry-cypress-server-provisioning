@@ -28,6 +28,10 @@ Authentication is done using basic auth, which is set up based on environment va
 
 ## Notes
 
+**Buildjet is highly recommended**
+
+[Buildjet](https://buildjet.com/for-github-actions) (no affiliation) supplies Github Action runners that have more resources. It makes running tests in parallel a lot faster. They have a free tier, and the paid tiers are priced reasonably based on usage. If Cypress charged reasonable fees like Buildjet, this repository would not exist. I hope you're listening Cypress.
+
 **Only the director is essential**
 
 The dashboard and API containers are nice for having a dashboard to view from, but there is no need for them if you just want to run tests in parallel and use local recordings for debugging.

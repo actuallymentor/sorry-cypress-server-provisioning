@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # run 4 copies of the current job in  parallel
+        # run 4 copies of the current job in parallel, you may increase this number
         containers: [ 1, 2, 3, 4 ]
     steps:
 
