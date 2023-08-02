@@ -5,9 +5,10 @@
 source .env
 
 # Overwrite the subdonain in the config with the configures subdomain in the .env
-sed -i "s/PROXY_DASHBOARD_SUBDOMAIN.*;/server_name $PROXY_DASHBOARD_SUBDOMAIN\.\*;/g" ./swag/nginx/proxy-confs/sorry-cypress.subdomain.conf
-sed -i "s/PROXY_API_SUBDOMAIN.*;/server_name $PROXY_API_SUBDOMAIN\.\*;/g" ./swag/nginx/proxy-confs/sorry-cypress.subdomain.conf
-sed -i "s/PROXY_DIRECTOR_SUBDOMAIN.*;/server_name $PROXY_DIRECTOR_SUBDOMAIN\.\*;/g" ./swag/nginx/proxy-confs/sorry-cypress.subdomain.conf
+sed -i "s/PROXY_DASHBOARD_SUBDOMAIN/$PROXY_DASHBOARD_SUBDOMAIN/g" ./swag/nginx/proxy-confs/sorry-cypress.subdomain.conf
+sed -i "s/PROXY_API_SUBDOMAIN/$PROXY_API_SUBDOMAIN/g" ./swag/nginx/proxy-confs/sorry-cypress.subdomain.conf
+sed -i "s/PROXY_DIRECTOR_SUBDOMAIN/$PROXY_DIRECTOR_SUBDOMAIN/g" ./swag/nginx/proxy-confs/sorry-cypress.subdomain.conf
+sed -i "s/PROXY_SERVER_DOMAIN/$PROXY_SERVER_DOMAIN/g" ./swag/nginx/proxy-confs/sorry-cypress.subdomain.conf
 
 # Install the .htpasswd file based on the ENV
 $users_exhausted

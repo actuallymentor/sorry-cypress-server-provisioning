@@ -1,0 +1,1 @@
+The API container cannot be accessed behind a basic-auth reverse proxy.

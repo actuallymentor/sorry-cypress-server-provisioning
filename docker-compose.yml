@@ -102,7 +102,7 @@ services:
     image: agoldis/sorry-cypress-dashboard:latest
     container_name: sorry-cypress-dashboard
     environment:
-      GRAPHQL_SCHEMA_URL: https://${PROXY_USER}:${PROXY_PASSWORD}@${PROXY_API_SUBDOMAIN}.${PROXY_SERVER_DOMAIN}
+      GRAPHQL_SCHEMA_URL: https://${PROXY_API_SUBDOMAIN}.${PROXY_SERVER_DOMAIN}
       GRAPHQL_CLIENT_CREDENTIALS: ''
       CI_URL: ''
       # As used in /swag/nginx/proxy-confs/sorry-cypress.subdomain.conf
