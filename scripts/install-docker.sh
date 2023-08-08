@@ -29,6 +29,13 @@ echo -e "\n\nInstalling docker\n\n"
 sudo apt update
 sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
+# Add the current user to docker for rootless docker running
+if [ -z "$USER" ]; then
+    USER=$(whoami)
+fi
+sudo groupadd docker || echo "Docker group already exists, proceeding"
+sudo usermod -aG docker $USER
+
 # Start docker daemon
 echo -e "\nStarting docker daemon\n"
 sudo service docker start
