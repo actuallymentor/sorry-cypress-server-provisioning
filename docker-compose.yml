@@ -45,10 +45,27 @@ services:
     ports:
       - 443:443
       - 80:80
+    depends_on:
+      - director
+      - api
+      - dashboard
     networks:
       - internal
       - external
     restart: unless-stopped
+
+  # Minio video storage
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY}
+    volumes:
+      - ./data/minio_data:/data
+    command: server /data
 
   ## ###############
   ## Cypress services
@@ -67,9 +84,11 @@ services:
       EXECUTION_DRIVER: '../execution/mongo/driver'
       SCREENSHOTS_DRIVER: '../screenshots/s3.driver'
       GITLAB_JOB_RETRIES: 'false'
-      AWS_ACCESS_KEY_ID: 'key'
-      AWS_SECRET_ACCESS_KEY: 'secret'
-      S3_BUCKET: sorry-cypress
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY}
+      S3_SECRET_ACCESS_KEY: ${MINIO_SECRET_KEY}
+      S3_BUCKET_NAME: sorry-cypress
+      #S3_REGION: us-east-1 
       PROBE_LOGGER: "false"
     ports:
       - 1234:1234
@@ -77,6 +96,7 @@ services:
       - internal
     depends_on:
       - mongo
+      - minio
     restart: unless-stopped
 
   # 2️⃣ Cypress API service (optional)
@@ -105,7 +125,7 @@ services:
       GRAPHQL_SCHEMA_URL: https://${PROXY_API_SUBDOMAIN}.${PROXY_SERVER_DOMAIN}
       GRAPHQL_CLIENT_CREDENTIALS: ''
       CI_URL: ''
-      # As used in /swag/nginx/proxy-confs/sorry-cypress.subdomain.conf
+      # Base path as used in /swag/nginx/proxy-confs/sorry-cypress.subdomain.conf
       # see source: https://github.com/sorry-cypress/sorry-cypress/blob/master/packages/dashboard/server/config.js
       # see source: https://github.com/sorry-cypress/sorry-cypress/blob/master/packages/dashboard/server/app.js
       BASE_PATH: '/'
@@ -115,6 +135,7 @@ services:
     depends_on:
       - mongo
       - api
+      - minio
     networks:
       - internal
     restart: unless-stopped

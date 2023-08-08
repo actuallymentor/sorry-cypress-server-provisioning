@@ -1,10 +1,10 @@
 #!/bin/bash
 # Exit if docker is intalled
-if which docker; then
-    echo "Docker is already installed"
+if which docker > /dev/null 2>&1; then
+    echo "✅ Docker is already installed"
     docker --version
     echo "If you suspect that docker is not installed correctly, you can run the following command to uninstall it:"
-    echo "apt purge -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin"
+    echo -e "apt purge -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin\n"
     exit 0
 fi
 

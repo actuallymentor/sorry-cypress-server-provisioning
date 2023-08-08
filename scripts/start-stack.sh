@@ -1,6 +1,10 @@
 #!/bin/bash
 # NOTE: script is designed to be run from the root of the project
 
+# Shutdown any existing docker stack
+cd ~/sorry-cypress
+docker compose down --remove-orphans
+
 # Get environment variables from .env file
 source .env
 
@@ -8,11 +12,9 @@ source .env
 bash scripts/apply-configs.sh
 
 echo -e "\n\nStarting sorry-cypress docker stack\n\n"
-cd ~/sorry-cypress
-docker compose down --remove-orphans
 docker compose pull
 docker compose up -d
 yes | docker system prune -a | grep 'Total reclaimed space'
 docker compose ps
-echo -e "\n\nDocker stack started\n\n"
-echo "You can track the status of the docker stack by running: docker compose logs -f"
+echo -e "\n\n✅ Docker stack started\n\n"
+echo -e "You can track the status of the docker stack by running: \ndocker compose logs -f"

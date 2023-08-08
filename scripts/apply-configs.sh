@@ -23,7 +23,7 @@ while [[ ! $users_exhausted ]]; do
 
     # If no user was found for this number, we are done
     if [[ ! ${!user_variable} ]]; then
-        echo "No more users to add to .htpasswd"
+        echo "✅ No more users to add to .htpasswd, proceeding"
         users_exhausted=true
         exit 0
     fi
