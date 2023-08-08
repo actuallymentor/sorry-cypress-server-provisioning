@@ -35,6 +35,7 @@ if [ -z "$USER" ]; then
 fi
 sudo groupadd docker || echo "Docker group already exists, proceeding"
 sudo usermod -aG docker $USER
+newgrp docker
 
 # Start docker daemon
 echo -e "\nStarting docker daemon\n"
