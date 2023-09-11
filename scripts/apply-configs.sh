@@ -18,8 +18,7 @@ while [[ ! $users_exhausted ]]; do
     user_variable="PROXY_USER$user_number"
     password_variable="PROXY_PASSWORD$user_number"
 
-    # echo "users_exhausted $users_exhausted, user_number $user_number, user_variable $user_variable, password_variable $password_variable"
-    
+    echo "Checking for $user_variable, value ${!user_variable}"
 
     # If no user was found for this number, we are done
     if [[ ! ${!user_variable} ]]; then
