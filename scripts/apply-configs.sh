@@ -42,6 +42,11 @@ while [[ ! $users_exhausted ]]; do
     # NOTE: this line OVERWRITES the existing .htpasswd
     echo "${!user_variable}:$(openssl passwd -5 ${!password_variable})" > ./swag/nginx/.htpasswd
 
+    # If user_number is unset, force it to 1 so that the increment brings it to 2
+    if [[ ! $user_number ]]; then
+        user_number=1
+    fi
+
     # Increment user number
     ((user_number++))
     sleep 2
