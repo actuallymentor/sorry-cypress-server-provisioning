@@ -13,6 +13,9 @@ sed -i "s/PROXY_SERVER_DOMAIN/$PROXY_SERVER_DOMAIN/g" ./swag/nginx/proxy-confs/s
 # Install the .htpasswd file based on the ENV
 $users_exhausted
 $user_number
+
+# Reset the .htpasswd file
+echo "" > ./swag/nginx/.htpasswd
 while [[ ! $users_exhausted ]]; do
 
     user_variable="PROXY_USER$user_number"
@@ -40,7 +43,7 @@ while [[ ! $users_exhausted ]]; do
 
     # Write password hash to .htpasswd
     # NOTE: this line OVERWRITES the existing .htpasswd
-    echo "${!user_variable}:$(openssl passwd -5 ${!password_variable})" > ./swag/nginx/.htpasswd
+    echo "${!user_variable}:$(openssl passwd -5 ${!password_variable})" >> ./swag/nginx/.htpasswd
 
     # If user_number is unset, force it to 1 so that the increment brings it to 2
     if [[ ! $user_number ]]; then
