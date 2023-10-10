@@ -25,7 +25,12 @@ Authentication is done using basic auth, which is set up based on environment va
 1. Follow the [sorry-cypress setup instructions](https://docs.sorry-cypress.dev/guide/get-started)
     - `npm i cypress-cloud`
     - Edit `cypress` CLI for `cypress-coud` [see docs](https://docs.sorry-cypress.dev/guide/get-started#running-cypress-tests-in-parallel)
-    - Add `cloudPlugin` to `cypress.config.js`
+    - Add `cloudPlugin` to `cypress.config.js`, example:
+        ```js
+        // Setting up sorry cypress
+        const { cloudPlugin } = require( "cypress-cloud/plugin" )
+        return cloudPlugin( on, config )
+        ```
 2. Set `cloudServiceUrl` in your `currents.config.js` to `https://your_user:your_password@sorry-cypress-director.your_domain.com`
 3. See `.github-actions.example.yml` for an example for how to set up a parallel resting CI on Github
 
