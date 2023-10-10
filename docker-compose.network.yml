@@ -1,0 +1,9 @@
+version: '3'
+
+# Network configuration, we'll make one internal network for the cypress container, and one publicly available network for the proxy
+networks:
+  internal:
+    name: internal
+    internal: true
+  external:
+    name: external

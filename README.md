@@ -23,8 +23,53 @@ Authentication is done using basic auth, which is set up based on environment va
 ## Setting up sorry-cypress
 
 1. Follow the [sorry-cypress setup instructions](https://docs.sorry-cypress.dev/guide/get-started)
+    - `npm i cypress-cloud`
+    - Edit `cypress` CLI for `cypress-coud` [see docs](https://docs.sorry-cypress.dev/guide/get-started#running-cypress-tests-in-parallel)
+    - Add `cloudPlugin` to `cypress.config.js`
 2. Set `cloudServiceUrl` in your `currents.config.js` to `https://your_user:your_password@sorry-cypress-director.your_domain.com`
 3. See `.github-actions.example.yml` for an example for how to set up a parallel resting CI on Github
+
+### Example usage in Github actions
+
+You can use the director in Github Actions by setting `currents.config.js` to:
+
+```js
+module.exports = {
+    projectId: "APP NAME", // the projectId, can be any values for sorry-cypress users
+    recordKey: "xxx", // the record key, can be any value for sorry-cypress users
+    cloudServiceUrl: "%%cypress_cloud_service_url%%",   // Sorry Cypress users - set the director service URL
+}
+```
+
+And in Github Actions add the URL with authentication using:
+
+```bash
+sed -i "s;%%cypress_cloud_service_url%%;${{ secrets.CYPRESS_CLOUD_SERVICE_URL }};g" currents.config.js
+```
+
+You can then run parallel testing using:
+
+```yml
+strategy:
+      fail-fast: false
+      matrix:
+        # run 3 copies of the current job in  parallel
+        containers: [ 1, 2, 3 ]
+```
+
+You can save the artifacts of the containers for debugging by using:
+
+```yml
+# If CI failed, upload the videos for debugging
+- name: Upload cypress video files
+if: always() # you can optionally set this to failure()
+uses: actions/upload-artifact@v3
+with:
+    name: cypress-videos ${{ matrix.containers }}
+    path: |
+    cypress/videos
+    cypress/screenshots
+```
 
 ## Notes
 

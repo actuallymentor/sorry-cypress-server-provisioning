@@ -1,0 +1,72 @@
+version: '3'
+
+services:
+
+  ## ###############
+  ## Infra services
+  ## ###############
+
+  # MongoDB service, this is used by the cypress services to store data
+  mongo:
+    image: mongo:4.4
+    container_name: mongo
+    volumes:
+      - ./data/data-mongo-cypress:/data/db
+    networks:
+      - internal
+    restart: unless-stopped
+
+  # Reverse proxy service, this is used to expose the cypress services to the world securely
+  swag:
+    image: lscr.io/linuxserver/swag:latest
+    container_name: swag
+    cap_add:
+      - NET_ADMIN
+    environment:
+      # Environment setup
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+      # Automatic SSL certificate provisioning
+      - URL=${PROXY_SERVER_DOMAIN}
+      - VALIDATION=http
+      - SUBDOMAINS=${PROXY_DIRECTOR_SUBDOMAIN},${PROXY_API_SUBDOMAIN},${PROXY_DASHBOARD_SUBDOMAIN}
+      - ONLY_SUBDOMAINS=true
+    volumes:
+      - ./swag:/config
+    ports:
+      - 443:443
+      - 80:80
+    depends_on:
+      - director
+      - mongo
+    networks:
+      - internal
+      - external
+    restart: unless-stopped
+
+
+  ## ###############
+  ## Cypress services
+  ## ###############
+
+  # Cypress director (required)
+  # Coordinates & parallelizes tests, saves test results, this is the container that the cypress test runner connects to
+  # This is the only **required** service to run parallel tests, see: https://docs.sorry-cypress.dev/configuration/in-memory
+  director:
+    image: agoldis/sorry-cypress-director:latest
+    container_name: sorry-cypress-director
+    environment:
+      MONGODB_URI: 'mongodb://mongo:27017'
+      MONGODB_DATABASE: 'sorry-cypress'
+      EXECUTION_DRIVER: '../execution/mongo/driver'
+      GITLAB_JOB_RETRIES: 'false'
+      #S3_REGION: us-east-1 
+      PROBE_LOGGER: "false"
+    ports:
+      - 1234:1234
+    networks:
+      - internal
+    depends_on:
+      - mongo
+    restart: unless-stopped
